@@ -9,7 +9,7 @@ namespace MultiQueueSimulation.ViewModels
         public int TotalRunTime { get; set; }
         public int TotalIdleTime { get; set; }
         public int TotalServiceTime { get; set; }
-        public int TotalCustomerWaitTime { get; set; }
+        public int TotalCustomerWaitTime { get; set;}
         public int CustomersWhoWaited { get; set; }
         public ResultsViewModel()
         {
@@ -20,19 +20,20 @@ namespace MultiQueueSimulation.ViewModels
         }
         private void ComputeResults()
         {
-            TotalServiceTime = ComputeTotalServiceTime();
+            //TotalServiceTime = ComputeTotalServiceTime();
             TotalCustomerWaitTime = ComputeTotalCustomerWaitTime();
             CustomersWhoWaited = ComputeNumberOfCustomersWhoWaited();
         }
-        int ComputeTotalServiceTime()
+        void ComputeTotalServiceTime()
         {
-            int Service_Time = 0;
-            for (int i = 0; i < TotalNumberOfCustomers; i++)
+            int TotalNumberOfServers = App.SimulationSystem.NumberOfServers;
+            for (int i = 0; i < TotalNumberOfServers; i++)
             {
-                Service_Time += App.SimulationSystem.SimulationTable.ElementAt(i).ServiceTime;
+                TotalServiceTime = App.SimulationSystem.Servers.ElementAt(i).TotalWorkingTime;
+                App.SimulationSystem.Servers.ElementAt(i).Utilization = TotalServiceTime / TotalRunTime;
+                App.SimulationSystem.Servers.ElementAt(i).AverageServiceTime = TotalServiceTime / TotalNumberOfCustomers;
+                App.SimulationSystem.Servers.ElementAt(i).IdleProbability= TotalIdleTime / TotalRunTime;
             }
-
-            return Service_Time;
         }
         int ComputeTotalCustomerWaitTime()
         {
@@ -44,7 +45,7 @@ namespace MultiQueueSimulation.ViewModels
 
             return TimeWaited;
         }
-        int ComputeNumberOfCustomersWhoWaited()
+         int ComputeNumberOfCustomersWhoWaited()
         {
             int CustomersWaited = 0;
             for (int i = 0; i < TotalNumberOfCustomers; i++)
@@ -61,8 +62,12 @@ namespace MultiQueueSimulation.ViewModels
         //public float Utilization = TotalServiceTime() / TotalRunTime;
 
         ///////////System OutPut Performance Measures//////
-        //public float AverageWaitingTime = TotalTimeCustomersWaited() / TotalNumberOfCustomers;
-        //public float PrababilityOfWaiting = NumberOfCustomersWaited() / TotalNumberOfCustomers;
+        public float AverageWaitingTime() {
+            return  TotalCustomerWaitTime / TotalNumberOfCustomers;
+        }
+        public float PrababilityOfWaiting() {
+            return CustomersWhoWaited / TotalNumberOfCustomers; 
+        } 
 
     }
 }
